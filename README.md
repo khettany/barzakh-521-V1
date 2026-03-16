@@ -6,7 +6,7 @@ A CSPRNG based on quadratic torsion and modular inversion over the
 Mersenne prime field M521. Designed as a certified source of randomness
 for key generation (AES, RSA, ECDSA, Ed25519).
 
-**Author:** Abdelghaffour Khettany (Morocco)
+**Author:** Abdelghaffour Khettany - EDIWARE -  (Morocco)
 **Patent:** OMPIC / PCT — Pending
 
 ## What is Barzakh-521?
