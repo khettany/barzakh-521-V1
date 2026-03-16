@@ -1,33 +1,7 @@
-/*
- * ========================================================================
- * BARZAKH-521: Geometric Chaos Engine over the M_521 Field
- * ========================================================================
- * Author       : Abdelghaffour Khettany (Morocco)
- * Paradigm     : Quadratic Torsion & Normative Obliteration
- * Date         : March 2026
- *
- * Intellectual Property Notice:
- * The Barzakh-521 architecture, including its Fused Injection isolation
- * methods and its Geometric Engine core, is subject to a pending patent
- * application (OMPIC - PCT Patent Pending).
- *
- * License: GNU AGPL v3 — Standard edition (max 4 cores).
- * Enterprise/Organization editions under separate commercial license.
- *
- * Certifications:
- *   - PractRand 1 TB    : 7 consecutive perfect passes (16 GB - 1 TB)
- *   - Z3 SMT Solver     : TIMEOUT at 390s (1-round, 2^1042 search space)
- *   - Bitwuzla SMT      : TIMEOUT all configs (1r+2r, 30/120/300s)
- *   - SAC               : 50.00% +/- 0.36% (ChaCha20-level avalanche)
- *   - Batch throughput   : 7.54 MB/s per core (Montgomery trick)
- *
- * Security model:
- *   k = (a * x^2 + b) * (x - a)^(-1) + w   (mod M_521)
- *   Output = k >> 265 (top 256 bits, 265 bits discarded)
- *   Breaking requires inverting a quadratic rational function over
- *   GF(2^521 - 1) with 265 bits of information loss per step.
- * ========================================================================
- */
+// Barzakh-521: CSPRNG over GF(2^521-1)
+// Copyright (C) 2026 Abdelghaffour Khettany. All rights reserved.
+// License: AGPL v3 (Standard edition)
+// Patent: OMPIC / PCT — Pending
 
 use sha3::{
     Shake256,
@@ -35,30 +9,11 @@ use sha3::{
 };
 use zeroize::Zeroize;
 
-// ============================================================================
-// Constants
-// ============================================================================
-
 const LIMBS: usize = 9;
 const TOP_BITS: u32 = 9;
 const TOP_MASK: u64 = (1u64 << TOP_BITS) - 1;
-
-/// Maximum cores for Standard (AGPL v3) tier.
-pub const STANDARD_MAX_CORES: usize = 4;
-
-/// Batch size for Montgomery trick (8 parallel inversions).
 pub const BATCH_SIZE: usize = 8;
 
-// ============================================================================
-// F521: Fixed-size arithmetic in GF(2^521 - 1)
-// ============================================================================
-
-/// 521-bit field element modulo M_521 = 2^521 - 1 (Mersenne prime).
-/// Stored as 9 x u64 limbs in little-endian order.
-/// Limb [8] uses only the low 9 bits (bit positions 512..520).
-///
-/// Implements automatic memory zeroization on drop to prevent
-/// key material from lingering in memory.
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct F521(pub [u64; 9]);
 
@@ -83,8 +38,6 @@ impl F521 {
         TOP_MASK,
     ]);
 
-    // --- Predicates ---------------------------------------------------------
-
     #[inline(always)]
     pub fn is_zero(&self) -> bool {
         let mut acc = 0u64;
@@ -108,9 +61,6 @@ impl F521 {
         true
     }
 
-    // --- Constructors -------------------------------------------------------
-
-    /// Build an F521 from arbitrary big-endian bytes, reduced mod M_521.
     pub fn from_bytes_be(bytes: &[u8]) -> Self {
         let mut limbs = [0u64; LIMBS];
         for (i, &b) in bytes.iter().rev().enumerate() {
@@ -124,10 +74,6 @@ impl F521 {
         r
     }
 
-    // --- Reduction ----------------------------------------------------------
-
-    /// Fold any bits above position 520 back into [0..520] using
-    /// the identity 2^521 = 1 (mod M_521). Also canonicalises M -> 0.
     #[inline(always)]
     fn full_reduce(&mut self) {
         let hi = self.0[8] >> TOP_BITS;
@@ -155,7 +101,6 @@ impl F521 {
         }
     }
 
-    /// Reduce a wide 18-limb product modulo M_521.
     #[inline(always)]
     fn mersenne_reduce_wide(p: &[u64; 18]) -> Self {
         let mut lo = [0u64; LIMBS];
@@ -189,9 +134,6 @@ impl F521 {
         out
     }
 
-    // --- Arithmetic ---------------------------------------------------------
-
-    /// (self + other) mod M_521
     #[inline(always)]
     pub fn add_mod(&self, other: &Self) -> Self {
         let mut r = [0u64; LIMBS];
@@ -215,7 +157,6 @@ impl F521 {
         out
     }
 
-    /// (self - other) mod M_521
     #[inline(always)]
     pub fn sub_mod(&self, other: &Self) -> Self {
         if self.ge(other) {
@@ -242,79 +183,65 @@ impl F521 {
         }
     }
 
-    /// (self * other) mod M_521 — schoolbook multiply + Mersenne reduction.
-    /// Uses unsafe bounds elision for hot inner loop performance.
     #[inline(always)]
     pub fn mul_mod(&self, other: &Self) -> Self {
         let mut result = [0u64; 18];
         for i in 0..LIMBS {
-            let ai = unsafe { *self.0.get_unchecked(i) } as u128;
+            let ai = self.0[i] as u128;
             let mut carry: u64 = 0;
             for j in 0..LIMBS {
-                let wide = ai
-                    * unsafe { *other.0.get_unchecked(j) } as u128
-                    + unsafe { *result.get_unchecked(i + j) } as u128
+                let wide = ai * (other.0[j] as u128)
+                    + result[i + j] as u128
                     + carry as u128;
-                unsafe { *result.get_unchecked_mut(i + j) = wide as u64 };
+                result[i + j] = wide as u64;
                 carry = (wide >> 64) as u64;
             }
-            unsafe { *result.get_unchecked_mut(i + LIMBS) = carry };
+            result[i + LIMBS] = carry;
         }
         Self::mersenne_reduce_wide(&result)
     }
 
-    /// self^2 mod M_521 — dedicated squaring (45 limb-muls instead of 81).
-    /// Uses unsafe bounds elision for hot inner loop performance.
     #[inline(always)]
     pub fn sqr_mod(&self) -> Self {
         let a = &self.0;
         let mut result = [0u64; 18];
 
-        // Cross terms (i < j), computed once
         for i in 0..LIMBS {
-            let ai = unsafe { *a.get_unchecked(i) } as u128;
+            let ai = a[i] as u128;
             let mut carry: u64 = 0;
             for j in (i + 1)..LIMBS {
-                let pos = i + j;
-                let cross = ai
-                    * unsafe { *a.get_unchecked(j) } as u128
-                    + unsafe { *result.get_unchecked(pos) } as u128
+                let cross = ai * (a[j] as u128)
+                    + result[i + j] as u128
                     + carry as u128;
-                unsafe { *result.get_unchecked_mut(pos) = cross as u64 };
+                result[i + j] = cross as u64;
                 carry = (cross >> 64) as u64;
             }
             if i + LIMBS < 18 {
-                unsafe { *result.get_unchecked_mut(i + LIMBS) += carry };
+                result[i + LIMBS] += carry;
             }
         }
 
-        // Double all cross terms
         let mut top_bit: u64 = 0;
         for i in 0..18 {
-            let v = unsafe { *result.get_unchecked(i) };
-            unsafe { *result.get_unchecked_mut(i) = (v << 1) | top_bit };
-            top_bit = v >> 63;
+            let new_top = result[i] >> 63;
+            result[i] = (result[i] << 1) | top_bit;
+            top_bit = new_top;
         }
 
-        // Add diagonal terms a[i]^2
         let mut carry = 0u128;
         for i in 0..LIMBS {
-            let sq = unsafe { *a.get_unchecked(i) } as u128
-                * unsafe { *a.get_unchecked(i) } as u128;
-            carry += unsafe { *result.get_unchecked(2 * i) } as u128
-                + (sq as u64) as u128;
-            unsafe { *result.get_unchecked_mut(2 * i) = carry as u64 };
+            let sq = (a[i] as u128) * (a[i] as u128);
+            carry += result[2 * i] as u128 + (sq as u64) as u128;
+            result[2 * i] = carry as u64;
             carry >>= 64;
-            carry += unsafe { *result.get_unchecked(2 * i + 1) } as u128
-                + (sq >> 64);
-            unsafe { *result.get_unchecked_mut(2 * i + 1) = carry as u64 };
+            carry += result[2 * i + 1] as u128 + (sq >> 64);
+            result[2 * i + 1] = carry as u64;
             carry >>= 64;
         }
 
         Self::mersenne_reduce_wide(&result)
     }
 
-    /// Bitwise XOR (used for state feedback x = W ^ k).
     #[inline(always)]
     pub fn xor(&self, other: &Self) -> Self {
         let mut r = [0u64; LIMBS];
@@ -323,7 +250,6 @@ impl F521 {
         if out == Self::M521 { F521::ZERO } else { out }
     }
 
-    /// Logical right-shift by n bits (for MSB extraction).
     #[inline(always)]
     pub fn shr(&self, n: u32) -> Self {
         let limb_off = (n / 64) as usize;
@@ -342,7 +268,6 @@ impl F521 {
         F521(r)
     }
 
-    /// Write the value into a big-endian byte buffer.
     pub fn to_bytes_be(&self, out: &mut [u8]) {
         let n = out.len();
         for i in 0..n {
@@ -357,10 +282,6 @@ impl F521 {
         }
     }
 
-    // --- Modular inversion via addition chain -------------------------------
-
-    /// self^(-1) mod M_521 via addition chain for exponent 2^521 - 3.
-    /// Total cost: 523 squarings + 13 multiplications = 536 mod-muls.
     pub fn inv_mod(&self) -> Self {
         let r1 = self.clone();
         let r2 = r1.sqr_mod().mul_mod(&r1);
@@ -406,16 +327,11 @@ impl F521 {
         r519.sqr_mod().sqr_mod().mul_mod(&r1)
     }
 
-    // --- Batch Inversion (Montgomery's Trick) --------------------------------
-
-    /// Invert N values with 1 inversion + 3(N-1) multiplications.
-    /// For N=8: 8 inversions -> 1 inversion + 21 muls = ~7x faster.
     pub fn batch_inv(vals: &[F521]) -> Vec<F521> {
         let n = vals.len();
         if n == 0 { return vec![]; }
         if n == 1 { return vec![vals[0].inv_mod()]; }
 
-        // Forward pass: cumulative products
         let mut cum = Vec::with_capacity(n);
         cum.push(vals[0].clone());
         for i in 1..n {
@@ -423,11 +339,9 @@ impl F521 {
             cum.push(prev.mul_mod(&vals[i]));
         }
 
-        // Single inversion of the total product
         let mut inv = cum[n - 1].inv_mod();
-
-        // Backward pass: recover individual inverses
         let mut result = vec![F521::ZERO; n];
+
         for i in (1..n).rev() {
             result[i] = inv.mul_mod(&cum[i - 1]);
             inv = inv.mul_mod(&vals[i]);
@@ -437,19 +351,6 @@ impl F521 {
     }
 }
 
-// ============================================================================
-// Barzakh521: Single-stream CSPRNG
-// ============================================================================
-
-/// Barzakh-521 Cryptographically Secure Pseudo-Random Number Generator.
-///
-/// Deterministic: the same seed always produces the same output sequence.
-/// All internal state is automatically zeroed on drop.
-///
-/// Formula:
-///   k = (a * x^2 + b) * (x - a)^(-1) + w   (mod 2^521 - 1)
-///   x <- W XOR k
-///   output = k >> 265  (top 256 bits)
 pub struct Barzakh521 {
     x: F521,
     a: F521,
@@ -469,9 +370,6 @@ impl Drop for Barzakh521 {
 }
 
 impl Barzakh521 {
-    /// Deterministic initialization from a seed.
-    /// All internal parameters are derived via SHAKE256 (XOF).
-    /// Intermediate buffers are zeroized after use.
     pub fn new(seed: &[u8]) -> Self {
         let mut hasher = Shake256::default();
         hasher.update(seed);
@@ -499,7 +397,6 @@ impl Barzakh521 {
         }
     }
 
-    /// Generate the next 256-bit (32-byte) output block.
     pub fn next_u256(&mut self) -> [u8; 32] {
         let mut denom = self.x.sub_mod(&self.a);
         if denom.is_zero() {
@@ -521,23 +418,11 @@ impl Barzakh521 {
     }
 }
 
-// ============================================================================
-// Barzakh521Batch: 8 parallel streams with Montgomery batch inversion
-// ============================================================================
-
-/// Batched CSPRNG using Montgomery's trick to amortize modular inversion.
-///
-/// Instead of 8 separate inversions (expensive), computes 1 inversion
-/// plus 21 multiplications. Result: 7.54 MB/s per core.
-///
-/// All internal state is automatically zeroed on drop.
 pub struct Barzakh521Batch {
     lanes: Vec<Barzakh521>,
 }
 
 impl Barzakh521Batch {
-    /// Create 8 independent streams from a master seed.
-    /// Each lane gets a unique domain: master_seed || lane_index.
     pub fn new(master_seed: &[u8]) -> Self {
         let mut lanes = Vec::with_capacity(BATCH_SIZE);
         for i in 0..BATCH_SIZE {
@@ -549,7 +434,6 @@ impl Barzakh521Batch {
         Self { lanes }
     }
 
-    /// Generate BATCH_SIZE * 32 = 256 bytes using batch inversion.
     pub fn next_batch(&mut self) -> Vec<u8> {
         let mut denoms = Vec::with_capacity(BATCH_SIZE);
         for lane in self.lanes.iter_mut() {
@@ -576,7 +460,6 @@ impl Barzakh521Batch {
         output
     }
 
-    /// Fill an arbitrary buffer with random bytes.
     pub fn fill_bytes(&mut self, dest: &mut [u8]) {
         let block_size = BATCH_SIZE * 32;
         let mut offset = 0;
@@ -592,10 +475,6 @@ impl Barzakh521Batch {
         }
     }
 }
-
-// ============================================================================
-// Tests
-// ============================================================================
 
 #[cfg(test)]
 mod tests {
@@ -644,21 +523,7 @@ mod tests {
             .collect();
         let invs = F521::batch_inv(&vals);
         for i in 0..vals.len() {
-            assert_eq!(vals[i].mul_mod(&invs[i]), F521::ONE,
-                "batch_inv failed at index {}", i);
-        }
-    }
-
-    #[test]
-    fn test_batch_inv_matches_individual() {
-        let vals: Vec<F521> = (0x10u8..0x18)
-            .map(|b| F521::from_bytes_be(&[b; 66]))
-            .collect();
-        let batch = F521::batch_inv(&vals);
-        for i in 0..vals.len() {
-            let individual = vals[i].inv_mod();
-            assert_eq!(batch[i], individual,
-                "batch[{}] != individual[{}]", i, i);
+            assert_eq!(vals[i].mul_mod(&invs[i]), F521::ONE);
         }
     }
 

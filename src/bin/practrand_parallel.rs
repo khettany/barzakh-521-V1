@@ -1,10 +1,10 @@
 use std::io::Write;
 use std::sync::mpsc;
 use std::thread;
-use barzakh_521::{Barzakh521Batch, STANDARD_MAX_CORES};
+use barzakh_521::Barzakh521Batch;
 
 fn main() {
-    let num_threads = STANDARD_MAX_CORES;
+    let num_threads = 4;
     let (tx, rx) = mpsc::sync_channel::<Vec<u8>>(num_threads * 4);
 
     for tid in 0..num_threads {

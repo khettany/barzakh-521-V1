@@ -1,7 +1,7 @@
 use barzakh_521::Barzakh521;
 
 fn main() {
-    println!("=== Barzakh-521: SAC (%) ===\n");
+    println!("=== Barzakh-521: SAC ===\n");
     let samples = 1u64 << 18;
     let output_bits = 256;
     let mut counts = vec![0u64; output_bits];
@@ -12,7 +12,7 @@ fn main() {
     let mut worst_dev = 0.0f64;
 
     println!("  {:>6} | {:>8} {:>8} {:>8} | {:>7} | {}",
-        "InBit", "Min%", "Avg%", "Max%", "Dev%", "Verdict");
+        "InBit", "Min%", "Avg%", "Max%", "Dev%", "Result");
     println!("  -------+---------------------------+---------+--------");
 
     for &bit_pos in &positions {
@@ -50,7 +50,7 @@ fn main() {
     }
     println!("\n  SAC = 50.000% +/- {:.3}%", worst_dev);
     if worst_dev < 0.50 {
-        println!("  VERDICT: PASS (cryptographic grade)");
+        println!("  VERDICT: PASS");
     } else if worst_dev < 1.0 {
         println!("  VERDICT: ACCEPTABLE");
     } else {
