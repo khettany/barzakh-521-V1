@@ -1,0 +1,29 @@
+    Finished `release` profile [optimized] target(s) in 0.02s
+     Running `target/release/test_sac`
+=== Barzakh-521: Strict Avalanche Criterion (SAC) ===
+
+  ⚠️  input bit   0 → max_dev=0.003548 (3.6σ) range=[0.4977,0.5035] worst=bit132
+  ⚠️  input bit   1 → max_dev=0.003105 (3.2σ) range=[0.4976,0.5031] worst=bit183
+  ⚠️  input bit   2 → max_dev=0.003208 (3.3σ) range=[0.4968,0.5030] worst=bit63
+  ✅ input bit   7 → max_dev=0.002121 (2.2σ) range=[0.4979,0.5019] worst=bit154
+  ✅ input bit   8 → max_dev=0.002483 (2.5σ) range=[0.4979,0.5025] worst=bit101
+  ✅ input bit  15 → max_dev=0.002769 (2.8σ) range=[0.4974,0.5028] worst=bit2
+  ✅ input bit  16 → max_dev=0.002708 (2.8σ) range=[0.4975,0.5027] worst=bit123
+  ⚠️  input bit  31 → max_dev=0.002983 (3.1σ) range=[0.4970,0.5028] worst=bit47
+  ✅ input bit  32 → max_dev=0.002399 (2.5σ) range=[0.4976,0.5022] worst=bit228
+  ⚠️  input bit  63 → max_dev=0.003078 (3.2σ) range=[0.4970,0.5031] worst=bit33
+  ✅ input bit  64 → max_dev=0.002792 (2.9σ) range=[0.4972,0.5027] worst=bit255
+  ✅ input bit 100 → max_dev=0.002705 (2.8σ) range=[0.4975,0.5027] worst=bit126
+  ⚠️  input bit 127 → max_dev=0.003567 (3.7σ) range=[0.4964,0.5026] worst=bit55
+  ✅ input bit 128 → max_dev=0.002365 (2.4σ) range=[0.4976,0.5020] worst=bit3
+  ⚠️  input bit 200 → max_dev=0.003204 (3.3σ) range=[0.4974,0.5032] worst=bit112
+  ✅ input bit 255 → max_dev=0.002396 (2.5σ) range=[0.4976,0.5023] worst=bit7
+
+=== RÉSUMÉ SAC ===
+  Échantillons      : 262144
+  Positions testées : 16
+  Pire σ global     : 3.7σ (input bit 127)
+  VERDICT           : ⚠️  SAC ACCEPTABLE (< 5σ)
+
+  Idéal : chaque bit de sortie change avec probabilité 50%
+  50% ± 0.001 = excellent, ± 0.01 = acceptable

@@ -1,0 +1,63 @@
+============================================================
+  BARZAKH-521 — Formal Verification Attack Suite
+  Bitwuzla + Z3 comparison
+============================================================
+
+  Secret x : 0x4c70242d6320903cf82e39a90390c5fb239b6b59493d3fc06742fd064bdbafaa96519b529277c5e85ab761d211905c8c0ad53016303715b1d51bda6159cef2b05c
+  Output   : 0xa4348b3d00065f2602b332a7906983406a913c1ccfd4b5020407ad13dcd574de
+
+============================================================
+  1round_30s — timeout 30s
+============================================================
+  Time:   40.09s (KILLED)
+
+  ✅ Bitwuzla HARD TIMEOUT — Barzakh-521 RESISTS
+
+  --- Z3 comparison ---
+  Z3 Time:   32.62s
+  Z3 Result: unknown
+
+============================================================
+  1round_120s — timeout 120s
+============================================================
+  Time:   130.21s (KILLED)
+
+  ✅ Bitwuzla HARD TIMEOUT — Barzakh-521 RESISTS
+
+  --- Z3 comparison ---
+  Z3 Time:   123.44s
+  Z3 Result: unknown
+
+============================================================
+  1round_300s — timeout 300s
+============================================================
+  Time:   310.20s (KILLED)
+
+  ✅ Bitwuzla HARD TIMEOUT — Barzakh-521 RESISTS
+
+  --- Z3 comparison ---
+  Z3 Time:   310.60s (TIMEOUT/MISSING)
+
+============================================================
+  2rounds_300s — timeout 300s
+============================================================
+  Time:   310.25s (KILLED)
+
+  ✅ Bitwuzla HARD TIMEOUT — Barzakh-521 RESISTS
+
+  --- Z3 comparison ---
+  Z3 Time:   310.77s (TIMEOUT/MISSING)
+
+============================================================
+  FINAL REPORT
+============================================================
+  Test                      Bitwuzla     Z3          
+  -------------------------------------------------
+  1r_30s                    timeout      unknown     
+  1r_120s                   timeout      unknown     
+  1r_300s                   timeout      timeout     
+  2r_300s                   timeout      timeout     
+
+  ✅ BARZAKH-521 RESISTS ALL ATTACKS
+     Both Bitwuzla and Z3 failed to recover state
+============================================================

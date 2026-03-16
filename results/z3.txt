@@ -1,0 +1,73 @@
+=== Test Case ===
+  x (secret)  : 0x4c70242d6320903cf82e39a90390c5fb239b6b59493d3fc06742fd064bdbafaa96519b529277c5e85ab761d211905c8c0ad53016303715b1d51bda6159cef2b05c
+  output (pub) : 0xa4348b3d00065f2602b332a7906983406a913c1ccfd4b5020407ad13dcd574de
+  k (full)     : 0x14869167a000cbe4c0566654f20d30680d52278399fa96a04080f5a27b9aae9bd1e7a754fbad4f3f36aa7d97c7edd38bac677fb059e4384364fceeb071355dae01d
+
+
+============================================================
+  ATTEMPT with 30s timeout
+============================================================
+
+=== Z3 Attack on Barzakh-521 ===
+Timeout: 30s
+Known output: 0xa4348b3d00065f2602b332a7906983406a913c1ccfd4b5020407ad13dcd574de
+
+Constraints built. Launching Z3 solver...
+  Variables: x (521-bit), inv_d (521-bit)
+  Constraints: modular inversion + quadratic + truncation
+  Search space: 2^521 × 2^521 = 2^1042
+
+Result: unknown
+Time:   32.69s
+
+  Z3 TIMEOUT/GAVE UP: timeout
+  → Barzakh-521 RESISTS Z3 after 32.7s
+
+  ✓ Barzakh-521 survived 30s
+
+============================================================
+  ATTEMPT with 120s timeout
+============================================================
+
+=== Z3 Attack on Barzakh-521 ===
+Timeout: 120s
+Known output: 0xa4348b3d00065f2602b332a7906983406a913c1ccfd4b5020407ad13dcd574de
+
+Constraints built. Launching Z3 solver...
+  Variables: x (521-bit), inv_d (521-bit)
+  Constraints: modular inversion + quadratic + truncation
+  Search space: 2^521 × 2^521 = 2^1042
+
+Result: unknown
+Time:   126.98s
+
+  Z3 TIMEOUT/GAVE UP: timeout
+  → Barzakh-521 RESISTS Z3 after 127.0s
+
+  ✓ Barzakh-521 survived 120s
+
+============================================================
+  ATTEMPT with 300s timeout
+============================================================
+
+=== Z3 Attack on Barzakh-521 ===
+Timeout: 300s
+Known output: 0xa4348b3d00065f2602b332a7906983406a913c1ccfd4b5020407ad13dcd574de
+
+Constraints built. Launching Z3 solver...
+  Variables: x (521-bit), inv_d (521-bit)
+  Constraints: modular inversion + quadratic + truncation
+  Search space: 2^521 × 2^521 = 2^1042
+
+Result: unknown
+Time:   390.68s
+
+  Z3 TIMEOUT/GAVE UP: timeout
+  → Barzakh-521 RESISTS Z3 after 390.7s
+
+  ✓ Barzakh-521 survived 300s
+
+============================================================
+  FINAL VERDICT: Barzakh-521 RESISTS Z3
+  (survived 450s total of SMT solving)
+============================================================

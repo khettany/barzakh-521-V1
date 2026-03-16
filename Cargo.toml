@@ -1,0 +1,40 @@
+[package]
+name = "barzakh-521"
+version = "1.0.0"
+edition = "2021"
+authors = ["Abdelghaffour Khettany"]
+description = "Barzakh-521: Geometric Chaos Engine — CSPRNG over GF(2^521-1)"
+license = "AGPL-3.0-or-later"
+repository = "https://github.com/AKhettany/barzakh-521"
+readme = "README.md"
+keywords = ["cryptography", "csprng", "prng", "mersenne", "security"]
+categories = ["cryptography"]
+
+[dependencies]
+sha3 = "0.10"
+zeroize = { version = "1", features = ["derive"] }
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+
+[[bin]]
+name = "bench"
+path = "src/bin/bench.rs"
+
+[[bin]]
+name = "example"
+path = "src/bin/example.rs"
+
+[[bin]]
+name = "practrand"
+path = "src/bin/practrand.rs"
+
+[[bin]]
+name = "practrand_parallel"
+path = "src/bin/practrand_parallel.rs"
+
+[[bin]]
+name = "test_sac"
+path = "src/bin/test_sac.rs"
