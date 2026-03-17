@@ -94,7 +94,8 @@ lingers in memory after the CSPRNG instance is destroyed.
 | Memory Zeroization | Yes | Yes | Yes |
 | Audit Hooks | - | - | Yes |
 
-Enterprise/Organization: enterprise@barzakh521.com
+Enterprise/Organization: com@barzakh521.com
+https://barzakh521.com
 
 ## License
 
