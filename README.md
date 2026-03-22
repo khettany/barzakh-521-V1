@@ -8,6 +8,7 @@ for key generation (AES, RSA, ECDSA, Ed25519).
 
 **Author:** Abdelghaffour Khettany - EDIWARE -  (Morocco)
 **Patent:** OMPIC / PCT — Pending
+E-mail: contact@ediwarelab.com
 
 ## What is Barzakh-521?
 
@@ -94,7 +95,8 @@ lingers in memory after the CSPRNG instance is destroyed.
 | Memory Zeroization | Yes | Yes | Yes |
 | Audit Hooks | - | - | Yes |
 
-Enterprise/Organization: com@barzakh521.com
+Enterprise/Organization: EDIWARELAB - Morocco
+E-mail: contact@ediwarelab.com / com@barzakh521.com
 https://barzakh521.com
 
 ## License
