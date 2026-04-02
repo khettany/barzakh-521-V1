@@ -45,6 +45,19 @@ It is the **certified source of randomness** that feeds both.
 
 At 7.5 MB/s, generates 234,000+ AES-256 keys per second.
 
+## Versions
+
+### v1 — Original (`src/lib.rs`)
+- Fully functional CSPRNG
+- PractRand 32 TB clean, BigCrush 160/160
+- Not constant-time
+
+### v2 — Constant-time (`src/v2-constant-time/lib.rs`)
+- All F521 arithmetic operations are constant-time
+- Side-channel resistant: no secret-dependent branches
+- Same outputs as v1 for identical seeds
+- Recommended for cryptographic deployment
+
 ## Quick Start
 
     git clone https://github.com/AKhettany/barzakh-521.git
