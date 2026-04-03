@@ -29,7 +29,7 @@ It is the **certified source of randomness** that feeds both.
 
 | Test | Result | Details |
 |------|--------|---------|
-| PractRand | PASS 32 TB | 7 consecutive perfect passes (16 GB - 32 TB) |
+| PractRand | PASS 64 TB | 11 consecutive perfect passes (16 GB - 64 TB) |
 | Z3 SMT | TIMEOUT 390s | 1-round attack, 2^1042 search space |
 | Bitwuzla | TIMEOUT all | 1r (30/120/300s) + 2r (300s) |
 | Bitwuzla + Z3 | BOTH FAIL | Neither solver recovers internal state |
@@ -49,7 +49,7 @@ At 7.5 MB/s, generates 234,000+ AES-256 keys per second.
 
 ### v1 — Original (`src/lib.rs`)
 - Fully functional CSPRNG
-- PractRand 32 TB clean, BigCrush 160/160
+- PractRand 64 TB clean, BigCrush 160/160
 - Not constant-time
 
 ### v2 — Constant-time (`src/v2-constant-time/lib.rs`)
