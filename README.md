@@ -112,6 +112,23 @@ Enterprise/Organization: EDIWARELAB - Morocco
 E-mail: contact@ediwarelab.com / com@barzakh521.com
 https://barzakh521.com
 
+## Research Paper
+
+The full academic paper describing the design and security 
+analysis of Barzakh-521 is available on the official website:
+
+📄 **[Read the paper on barzakh521.com](https://barzakh521.com/barzakh521_v1_en.pdf)**
+
+**Title:** *Barzakh-521: A Rational Quadratic CSPRNG over 
+GF(2^521-1) with Resistance to Lattice and Algebraic Attacks*
+
+**Highlights:**
+- Five formal security propositions (Coppersmith, lattice, 
+  algebraic, circuit complexity, exposure ratio)
+- 64 TB PractRand with zero anomalies
+- 160/160 TestU01 BigCrush
+- New hardness assumption: Rational Hidden Number Problem (RHNP)
+
 ## License
 
 Standard: GNU AGPL v3 — see LICENSE
