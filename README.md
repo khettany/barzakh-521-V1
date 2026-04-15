@@ -29,7 +29,7 @@ It is the **certified source of randomness** that feeds both.
 
 | Test | Result | Details |
 |------|--------|---------|
-| PractRand | PASS 64 TB | 11 consecutive perfect passes (16 GB - 64 TB) |
+| PractRand | PASS 128 TB | 13 consecutive perfect passes (16 GB - 128 TB) |
 | Z3 SMT | TIMEOUT 390s | 1-round attack, 2^1042 search space |
 | Bitwuzla | TIMEOUT all | 1r (30/120/300s) + 2r (300s) |
 | Bitwuzla + Z3 | BOTH FAIL | Neither solver recovers internal state |
@@ -49,7 +49,7 @@ At 7.5 MB/s, generates 234,000+ AES-256 keys per second.
 
 ### v1 — Original (`src/lib.rs`)
 - Fully functional CSPRNG
-- PractRand 64 TB clean, BigCrush 160/160
+- PractRand 128 TB clean, BigCrush 160/160
 - Not constant-time
 
 ### v2 — Constant-time (`src/v2-constant-time/lib.rs`)
@@ -125,7 +125,7 @@ GF(2^521-1) with Resistance to Lattice and Algebraic Attacks*
 **Highlights:**
 - Five formal security propositions (Coppersmith, lattice, 
   algebraic, circuit complexity, exposure ratio)
-- 64 TB PractRand with zero anomalies
+- 128 TB PractRand with zero anomalies
 - 160/160 TestU01 BigCrush
 - New hardness assumption: Rational Hidden Number Problem (RHNP)
 
